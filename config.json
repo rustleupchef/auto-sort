@@ -1,5 +1,5 @@
 {
     "from" : [],
     "to" : [],
-    "targets" : ["dd", "dd"]
+    "exceptions" : []
 }
