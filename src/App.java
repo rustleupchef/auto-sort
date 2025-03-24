@@ -26,14 +26,24 @@ public class App {
         to = filterPaths(to);
 
         while (true) {
+            if (to.length == 0) {
+                System.out.println("No valid paths to move files to");
+                break;
+            }
+            
             for (String fromPath : from) {
                 File[] files = new File(fromPath).listFiles();
                 for (File file : files) {
                     if (file.isDirectory())
                         continue;
-                    int goTo = ollama(file.getName(), to);
-                    if (goTo < 0) continue;
-                    file.renameTo(new File(Paths.get(to[goTo]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
+                    
+                    int goTo = 0;
+                    if (to.length > 1) {
+                        goTo = ollama(file.getName(), to);
+                        if (goTo < 0) continue;
+                        file.renameTo(new File(Paths.get(to[goTo]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
+                    }
+                    file.renameTo(new File(Paths.get(to[0]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
                 }
             }
         }
