@@ -1,5 +1,5 @@
 {
-    "from" : [],
-    "to" : [],
-    "exceptions" : []
+    "from" : ["/home/siddhant/Downloads/"],
+    "to" : ["/home/siddhant/Documents/", "/home/siddhant/Pictures/", "/home/siddhant/Videos/"],
+    "model" : "mistral"
 }

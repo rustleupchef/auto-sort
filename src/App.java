@@ -1,5 +1,10 @@
 import java.io.File;
 import java.io.FileReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,16 +14,29 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class App {
+    private static String model;
     public static void main(String[] args) throws Exception {
         JSONObject config = (JSONObject) new JSONParser().parse(new FileReader("config.json"));
 
         String[] from = jsonArraytoStringArray(config.get("from"));
         String[] to = jsonArraytoStringArray(config.get("to"));
-        String[] exceptions = jsonArraytoStringArray(config.get("exceptions"));
+        model = (String) config.get("model");
 
         from = filterPaths(from);
         to = filterPaths(to);
-        exceptions = filter(false, exceptions);
+
+        while (true) {
+            for (String fromPath : from) {
+                File[] files = new File(fromPath).listFiles();
+                for (File file : files) {
+                    if (file.isDirectory())
+                        continue;
+                    int goTo = ollama(file.getName(), to);
+                    if (goTo < 0) continue;
+                    file.renameTo(new File(Paths.get(to[goTo]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
+                }
+            }
+        }
     }
 
     private static String[] jsonArraytoStringArray(Object objectArray) {
@@ -57,5 +75,48 @@ public class App {
             array[i] = trimed;
         }
         return array;
+    }
+
+    private static int ollama(String filename, String[] targetDirs) {
+        String systemPrompt = "";
+
+        for (int i = 0; i < targetDirs.length; i++) {
+            systemPrompt += "[" + i + "] " + targetDirs[i] + "\n";
+        }
+
+        systemPrompt += 
+            "You will be prompted to choose a location to place the file in.\n" +
+            "Please enter the number of the location you want to place the file in.\n" +
+            "Enter just the number";
+
+        JSONObject payload = new JSONObject();
+
+        payload.put("model", model);
+        payload.put("system", systemPrompt);
+        payload.put("prompt", "Which location should I place the file in? The file name is:" + filename);
+
+        JSONObject options = new JSONObject();
+        options.put("num_predict", 1);
+        options.put("temperature", 0.0);
+
+        payload.put("options", options);
+        payload.put("stream", false);
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:11434/api/generate"))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(payload.toJSONString()))
+            .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200)
+                return -1;
+            
+            return 0;
+        } catch (Exception e) {
+            return -1;
+        }
     }
 }
