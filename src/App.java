@@ -25,12 +25,22 @@ public class App {
         from = filterPaths(from);
         to = filterPaths(to);
 
+        if (to.length == 0) {
+            System.out.println("No valid paths to move files to");
+            return;
+        }
+
+        if (from.length == 0) {
+            System.out.println("No valid paths to move files from");
+            return;
+        }
+
+        if (model.equals("")) {
+            System.out.println("No model specified");
+            return;
+        }
+
         while (true) {
-            if (to.length == 0) {
-                System.out.println("No valid paths to move files to");
-                break;
-            }
-            
             for (String fromPath : from) {
                 File[] files = new File(fromPath).listFiles();
                 for (File file : files) {
