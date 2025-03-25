@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,17 +28,17 @@ public class App {
         to = filterPaths(to);
 
         if (to.length == 0) {
-            System.out.println("No valid paths to move files to");
+            JOptionPane.showMessageDialog(null, "Invalid Config.json. To is not filled out", "Problem", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         if (from.length == 0) {
-            System.out.println("No valid paths to move files from");
+            JOptionPane.showMessageDialog(null, "Invalid Config.json. From is not filled out", "Problem", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         if (model.equals("")) {
-            System.out.println("No model specified");
+            JOptionPane.showMessageDialog(null, "Invalid Config.json. Model is not filled out", "Problem", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
