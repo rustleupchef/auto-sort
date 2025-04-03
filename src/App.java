@@ -28,17 +28,29 @@ public class App {
         to = filterPaths(to);
 
         if (to.length == 0) {
-            JOptionPane.showMessageDialog(null, "Invalid Config.json. To is not filled out", "Error", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                null, 
+                "Invalid Config.json. To is not filled out", 
+                "Error", 
+                JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         if (from.length == 0) {
-            JOptionPane.showMessageDialog(null, "Invalid Config.json. From is not filled out", "Error", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                null, 
+                "Invalid Config.json. From is not filled out", 
+                "Error", 
+                JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         if (model.equals("")) {
-            JOptionPane.showMessageDialog(null, "Invalid Config.json. Model is not filled out", "Error", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                null,
+                "Invalid Config.json. Model is not filled out",
+                "Error",
+                JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
