@@ -17,11 +17,15 @@ import org.json.simple.parser.JSONParser;
 
 public class App {
     private static String model;
+    private static String[] types;
+    private static boolean isException;
     public static void main(String[] args) throws Exception {
         JSONObject config = (JSONObject) new JSONParser().parse(new FileReader("config.json"));
 
         String[] from = jsonArraytoStringArray(config.get("from"));
         String[] to = jsonArraytoStringArray(config.get("to"));
+        types = jsonArraytoStringArray(config.get("types"));
+        isException = (boolean) config.get("isException");
         model = (String) config.get("model");
 
         from = filterPaths(from);

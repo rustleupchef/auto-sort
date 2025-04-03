@@ -1,5 +1,7 @@
 {
     "from" : ["/home/siddhant/Downloads/"],
     "to" : ["/home/siddhant/Documents/", "/home/siddhant/Pictures/", "/home/siddhant/Videos/"],
+    "isExceptions" : false,
+    "types" : [],
     "model" : "mistral"
 }
