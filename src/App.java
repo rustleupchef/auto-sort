@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -17,19 +19,32 @@ import org.json.simple.parser.JSONParser;
 
 public class App {
     private static String model;
-    private static String[] types;
+    private static HashSet<String> types = new HashSet<String>();
     private static boolean isException;
     public static void main(String[] args) throws Exception {
+
+        if (args.length > 0 && args[0].equals("clear")) {
+            File logFile = new File("log.txt");
+            if (logFile.exists()) {
+                logFile.delete();
+            }
+            return;
+        }
+
         JSONObject config = (JSONObject) new JSONParser().parse(new FileReader("config.json"));
 
         String[] from = jsonArraytoStringArray(config.get("from"));
         String[] to = jsonArraytoStringArray(config.get("to"));
-        types = jsonArraytoStringArray(config.get("types"));
+        String[] typesArray = jsonArraytoStringArray(config.get("types"));
         isException = (boolean) config.get("isException");
         model = (String) config.get("model");
 
         from = filterPaths(from);
         to = filterPaths(to);
+        typesArray = filter(false, typesArray);
+
+        for (String type : typesArray)
+            types.add(type);
 
         if (to.length == 0) {
             JOptionPane.showMessageDialog(
@@ -62,6 +77,14 @@ public class App {
             for (String fromPath : from) {
                 File[] files = new File(fromPath).listFiles();
                 for (File file : files) {
+
+                    String[] nameSplit = file.getName().split(".");
+                    if (types.contains(nameSplit[nameSplit.length - 1]) && isException)
+                        continue;
+                    
+                    if (types.contains(nameSplit[nameSplit.length - 1]) && isException)
+                        continue;
+                    
                     if (file.isDirectory())
                         continue;
                     
@@ -70,8 +93,10 @@ public class App {
                         goTo = ollama(file.getName(), to);
                         if (goTo < 0) continue;
                         file.renameTo(new File(Paths.get(to[goTo]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
+                        log("File: " + file.getName() + " moved to: " + to[goTo]);
                     }
                     file.renameTo(new File(Paths.get(to[0]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
+                    log("File: " + file.getName() + " moved to: " + to[0]);
                 }
             }
         }
@@ -156,5 +181,11 @@ public class App {
         } catch (Exception e) {
             return -1;
         }
+    }
+
+    private static void log(String message) throws IOException {
+        FileWriter writer = new FileWriter(new File("log.txt"), true);
+        writer.write(message + "\n");
+        writer.close();
     }
 }
