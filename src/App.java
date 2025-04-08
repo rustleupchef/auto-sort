@@ -36,7 +36,7 @@ public class App {
         String[] from = jsonArraytoStringArray(config.get("from"));
         String[] to = jsonArraytoStringArray(config.get("to"));
         String[] typesArray = jsonArraytoStringArray(config.get("types"));
-        isException = (boolean) config.get("isException");
+        isException = (boolean) config.get("isExceptions");
         model = (String) config.get("model");
 
         from = filterPaths(from);
@@ -78,14 +78,17 @@ public class App {
                 File[] files = new File(fromPath).listFiles();
                 for (File file : files) {
 
-                    String[] nameSplit = file.getName().split(".");
-                    if (types.contains(nameSplit[nameSplit.length - 1]) && isException)
+                    if (file.isHidden())
                         continue;
-                    
-                    if (types.contains(nameSplit[nameSplit.length - 1]) && isException)
-                        continue;
-                    
                     if (file.isDirectory())
+                        continue;
+
+                    String[] nameSplit = file.getName().split("\\.");
+
+                    if (types.contains(nameSplit[nameSplit.length - 1]) && isException)
+                        continue;
+                    
+                    if (!types.contains(nameSplit[nameSplit.length - 1]) && !isException)
                         continue;
                     
                     int goTo = 0;
@@ -94,6 +97,7 @@ public class App {
                         if (goTo < 0) continue;
                         file.renameTo(new File(Paths.get(to[goTo]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
                         log("File: " + file.getName() + " moved to: " + to[goTo]);
+                        continue;
                     }
                     file.renameTo(new File(Paths.get(to[0]).resolve(Paths.get(file.getName())).toAbsolutePath().toString()));
                     log("File: " + file.getName() + " moved to: " + to[0]);
@@ -151,7 +155,6 @@ public class App {
             "You will be prompted to choose a location to place the file in.\n" +
             "Please enter the number of the location you want to place the file in.\n" +
             "Enter just the number";
-
         JSONObject payload = new JSONObject();
 
         payload.put("model", model);
@@ -176,8 +179,9 @@ public class App {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200)
                 return -1;
-            
-            return 0;
+            JSONObject jsonResponse = (JSONObject) new JSONParser().parse(response.body());
+            String result = (String) jsonResponse.get("response");
+            return Integer.parseInt(result.trim());
         } catch (Exception e) {
             return -1;
         }
